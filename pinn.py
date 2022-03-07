@@ -21,8 +21,8 @@ from utils import *
 from network import W
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.io import loadmat
-from scipy.interpolate import griddata
+# from scipy.io import loadmat
+# from scipy.interpolate import griddata
 import time
 from itertools import product, combinations
 from mpl_toolkits.mplot3d import Axes3D
@@ -109,6 +109,7 @@ class Trainer:
                     self.optimizer.zero_grad()
 
                     if self.supervised:
+                        print('Supervised enabled')
                         # prediction on interior and boundary points
                         u_pred_tilde = self.w.forward(self.X_tilde)
 
@@ -152,6 +153,7 @@ class Trainer:
                     l3 = torch.mean(torch.square(torch.flatten(boundary_loss_term)))
 
                     if self.supervised:
+                        print('Supervised enabled')
                         train_loss = l1 + l2 + l3
                     else:
                         train_loss = l2 + l3
@@ -303,7 +305,7 @@ class Trainer:
                     # test
                     print('===TEST' + '='*40)
                     print(f'PINN MSE: {test_mse}')
-                    print(f'u1 MSE: {self.test_mse1}')
+                    # print(f'u1 MSE: {self.test_mse1}')
 
                     # l2 errors
                     print(f'\nL2 errors w.r.t. u_true')
@@ -314,7 +316,7 @@ class Trainer:
                     # test
                     print('===TEST' + '='*40)
                     print(f'PINN L2: {test_l2}')
-                    print(f'u1 L2: {self.test_u1_error}')
+                    # print(f'u1 L2: {self.test_u1_error}')
             except KeyboardInterrupt:
                 print('Keyboard Interrupt. Ending training.')
                 return dict(self.logged_results)
@@ -327,12 +329,12 @@ def save_results(data, file_name):
         json.dump(data, f, indent=4)
 
 if __name__ == "__main__":
-    orders = [2]
-    training_size = [582, 828, 1663, 2236, 3196, 4977, 6114, 8767, 19638]
+    orders = [4]
+    network_precision = "float64"
+    training_size = [582]
     supervised_options = [False]
     activation_function = 'tanh'
     lr = 0.2
-    results_folder = f"gpu_{precision_string}_results"
   
     for cur_supervised_option in supervised_options:
         print(f'\nGoing over supervised={cur_supervised_option}')
@@ -341,10 +343,6 @@ if __name__ == "__main__":
                 supervised_file_bool = 'supervised' if cur_supervised_option else 'unsupervised'
                 file_name = f"{order}_{size}"
                 test_name = f"{order}_21748_test"
-                save_folder = f'../{results_folder}/vanilla_pinn/{order}/{size}/{supervised_file_bool}/'
-                if not os.path.isdir(save_folder):
-                    os.makedirs(save_folder)
-                save_file_name = save_folder + 'results.json'
 
                 print('\n\n')
                 print('+'*70)
@@ -353,35 +351,33 @@ if __name__ == "__main__":
                 print('\n\n')
 
                 # read mat files
-                X_i = torch.tensor(loadmat(f"../scai/files_{file_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
-                X_b = torch.tensor(loadmat(f"../scai/files_{file_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
-                X_g = torch.tensor(loadmat(f"../scai/files_{file_name}/Xg.mat")["X_g"], dtype=PRECISION, requires_grad=True).to(device)
-                n = torch.tensor(loadmat(f"../scai/files_{file_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
-                u_true = torch.tensor(loadmat(f"../scai/files_{file_name}/u.mat")["u"], dtype=PRECISION).to(device)
-                u1 = torch.tensor(loadmat(f"../scai/files_{file_name}/u1.mat")["u1"], dtype=PRECISION, requires_grad=True).to(device)
-                f = torch.tensor(loadmat(f"../scai/files_{file_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
-                g = torch.tensor(loadmat(f"../scai/files_{file_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
-                alpha = torch.tensor(loadmat(f"../scai/files_{file_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
-                beta = torch.tensor(loadmat(f"../scai/files_{file_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
-                L1 = torch.tensor(loadmat(f"../scai/files_{file_name}/L1.mat")["L1"].A, dtype=PRECISION).to(device)
-                B1 = torch.tensor(loadmat(f"../scai/files_{file_name}/B1.mat")["B1"].A, dtype=PRECISION).to(device)
-                mse1 = torch.tensor(loadmat(f"../scai/files_{file_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
-                u1_error = torch.tensor(loadmat(f"../scai/files_{file_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
+                X_i = torch.tensor(loadmat(f"files_{file_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
+                X_b = torch.tensor(loadmat(f"files_{file_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
+                X_g = torch.tensor(loadmat(f"files_{file_name}/Xg.mat")["X_g"], dtype=PRECISION, requires_grad=True).to(device)
+                n = torch.tensor(loadmat(f"files_{file_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
+                u_true = torch.tensor(loadmat(f"files_{file_name}/u.mat")["u"], dtype=PRECISION).to(device)
+                u1 = torch.tensor(loadmat(f"files_{file_name}/u1.mat")["u1"], dtype=PRECISION, requires_grad=True).to(device)
+                f = torch.tensor(loadmat(f"files_{file_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
+                g = torch.tensor(loadmat(f"files_{file_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
+                alpha = torch.tensor(loadmat(f"files_{file_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
+                beta = torch.tensor(loadmat(f"files_{file_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
+                mse1 = torch.tensor(loadmat(f"files_{file_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
+                u1_error = torch.tensor(loadmat(f"files_{file_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
                 b_starts = X_i.shape[0]
                 b_end = b_starts + X_b.shape[0]
 
 
                 # test files
-                X_i_test = torch.tensor(loadmat(f"../scai/files_{test_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
-                X_b_test = torch.tensor(loadmat(f"../scai/files_{test_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
-                test_mse1 = torch.tensor(loadmat(f"../scai/files_{test_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
-                test_u1_error = torch.tensor(loadmat(f"../scai/files_{test_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
-                test_u_true = torch.tensor(loadmat(f"../scai/files_{test_name}/u.mat")["u"], dtype=PRECISION).to(device)
-                f_test = torch.tensor(loadmat(f"../scai/files_{test_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
-                g_test = torch.tensor(loadmat(f"../scai/files_{test_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
-                alpha_test = torch.tensor(loadmat(f"../scai/files_{test_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
-                beta_test = torch.tensor(loadmat(f"../scai/files_{test_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
-                n_test = torch.tensor(loadmat(f"../scai/files_{test_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
+                X_i_test = torch.tensor(loadmat(f"files_{test_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
+                X_b_test = torch.tensor(loadmat(f"files_{test_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
+                test_mse1 = torch.tensor(loadmat(f"files_{test_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
+                test_u1_error = torch.tensor(loadmat(f"files_{test_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
+                test_u_true = torch.tensor(loadmat(f"files_{test_name}/u.mat")["u"], dtype=PRECISION).to(device)
+                f_test = torch.tensor(loadmat(f"files_{test_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
+                g_test = torch.tensor(loadmat(f"files_{test_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
+                alpha_test = torch.tensor(loadmat(f"files_{test_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
+                beta_test = torch.tensor(loadmat(f"files_{test_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
+                n_test = torch.tensor(loadmat(f"files_{test_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
 
                 test_x_i = X_i_test[:, 0].unsqueeze(dim=1)
                 test_y_i = X_i_test[:, 1].unsqueeze(dim=1)
@@ -408,16 +404,15 @@ if __name__ == "__main__":
                 # define list for Trainer input
                 config = {
                     'spatial_dim': 2,
-                    'precision': precision_string,
+                    'precision': network_precision,
                     'activation': activation_function,
                     'order': 2, # activation order
                     'layers': 4,
                     'nodes': 50,
-                    'epochs': 5000,
+                    'epochs': 200,
                     'optimizer': 'lbfgs',
                     'lr': lr,
                 }
-                print(f"Learning rate: {config['lr']}")
                 vars = {
                     'n': n,
                     'x_i': x_i,
@@ -429,8 +424,6 @@ if __name__ == "__main__":
                     'ib_idx': ib_idx,
                     'u': u1,
                     'u_true': u_true,
-                    'L1': L1,
-                    'B1': B1,
                     'test_X_tilde': test_X_tilde,
                     'test_u_true': test_u_true,
                     'test_mse1': test_mse1,
@@ -472,6 +465,5 @@ if __name__ == "__main__":
                         flag = False
 
                 logged_results = logged_results | config
-                save_results(logged_results, save_file_name)
                 config['lr'] = lr
 
