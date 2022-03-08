@@ -21,8 +21,7 @@ from utils import *
 from network import W
 import numpy as np
 import matplotlib.pyplot as plt
-# from scipy.io import loadmat
-# from scipy.interpolate import griddata
+from scipy.io import loadmat
 import time
 from itertools import product, combinations
 from mpl_toolkits.mplot3d import Axes3D
