@@ -1,0 +1,23 @@
+# Atomhacks 2022
+
+This repository contains the code for the _Machine Learning Research in Computational Science_ workshop in the hackathon.
+
+
+## Dependencies
+
+This code requires the following Python libraries:
+
++ numpy
++ pandas
++ torch
++ matplotlib
+
+
+To install these, use the ``requirements.txt`` provided in the repository with ```pip install -r requirements.txt```
+
+
+## Use
+
+To run the code as is, run the ``pinn.py`` module in your terminal:
+
+```>> python pinn.py``
