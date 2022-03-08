@@ -13,11 +13,14 @@ This code requires the following Python libraries:
 + matplotlib
 
 
-To install these, use the ``requirements.txt`` provided in the repository with ```pip install -r requirements.txt```
+To install these, use the ``requirements.txt`` provided in the repository by running
+```pip install -r requirements.txt```
 
 
 ## Use
 
-To run the code as is, run the ``pinn.py`` module in your terminal:
+To run the code as is, execute the ``pinn.py`` module in your terminal:
 
-```>> python pinn.py``
+```python
+>> python pinn.py
+```
