@@ -328,7 +328,6 @@ def save_results(data, file_name):
         json.dump(data, f, indent=4)
 
 if __name__ == "__main__":
-    orders = [4]
     network_precision = "float64"
     training_size = [582]
     supervised_options = [False]
@@ -337,132 +336,131 @@ if __name__ == "__main__":
   
     for cur_supervised_option in supervised_options:
         print(f'\nGoing over supervised={cur_supervised_option}')
-        for order in orders:
-            for size in training_size:
-                supervised_file_bool = 'supervised' if cur_supervised_option else 'unsupervised'
-                file_name = f"{order}_{size}"
-                test_name = f"{order}_21748_test"
+        for size in training_size:
+            supervised_file_bool = 'supervised' if cur_supervised_option else 'unsupervised'
+            file_name = f"{size}"
+            test_name = f"21748_test"
 
-                print('\n\n')
-                print('+'*70)
-                print(f'Running Approach 1 on {file_name} with {activation_function}')
-                print('+'*70)
-                print('\n\n')
+            print('\n\n')
+            print('+'*70)
+            print(f'Running Approach 1 on {file_name} with {activation_function}')
+            print('+'*70)
+            print('\n\n')
 
-                # read mat files
-                X_i = torch.tensor(loadmat(f"files_{file_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
-                X_b = torch.tensor(loadmat(f"files_{file_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
-                X_g = torch.tensor(loadmat(f"files_{file_name}/Xg.mat")["X_g"], dtype=PRECISION, requires_grad=True).to(device)
-                n = torch.tensor(loadmat(f"files_{file_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
-                u_true = torch.tensor(loadmat(f"files_{file_name}/u.mat")["u"], dtype=PRECISION).to(device)
-                u1 = torch.tensor(loadmat(f"files_{file_name}/u1.mat")["u1"], dtype=PRECISION, requires_grad=True).to(device)
-                f = torch.tensor(loadmat(f"files_{file_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
-                g = torch.tensor(loadmat(f"files_{file_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
-                alpha = torch.tensor(loadmat(f"files_{file_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
-                beta = torch.tensor(loadmat(f"files_{file_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
-                mse1 = torch.tensor(loadmat(f"files_{file_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
-                u1_error = torch.tensor(loadmat(f"files_{file_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
-                b_starts = X_i.shape[0]
-                b_end = b_starts + X_b.shape[0]
+            # read mat files
+            X_i = torch.tensor(loadmat(f"files_{file_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
+            X_b = torch.tensor(loadmat(f"files_{file_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
+            X_g = torch.tensor(loadmat(f"files_{file_name}/Xg.mat")["X_g"], dtype=PRECISION, requires_grad=True).to(device)
+            n = torch.tensor(loadmat(f"files_{file_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
+            u_true = torch.tensor(loadmat(f"files_{file_name}/u.mat")["u"], dtype=PRECISION).to(device)
+            u1 = torch.tensor(loadmat(f"files_{file_name}/u1.mat")["u1"], dtype=PRECISION, requires_grad=True).to(device)
+            f = torch.tensor(loadmat(f"files_{file_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
+            g = torch.tensor(loadmat(f"files_{file_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
+            alpha = torch.tensor(loadmat(f"files_{file_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
+            beta = torch.tensor(loadmat(f"files_{file_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
+            mse1 = torch.tensor(loadmat(f"files_{file_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
+            u1_error = torch.tensor(loadmat(f"files_{file_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
+            b_starts = X_i.shape[0]
+            b_end = b_starts + X_b.shape[0]
 
 
-                # test files
-                X_i_test = torch.tensor(loadmat(f"files_{test_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
-                X_b_test = torch.tensor(loadmat(f"files_{test_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
-                test_mse1 = torch.tensor(loadmat(f"files_{test_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
-                test_u1_error = torch.tensor(loadmat(f"files_{test_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
-                test_u_true = torch.tensor(loadmat(f"files_{test_name}/u.mat")["u"], dtype=PRECISION).to(device)
-                f_test = torch.tensor(loadmat(f"files_{test_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
-                g_test = torch.tensor(loadmat(f"files_{test_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
-                alpha_test = torch.tensor(loadmat(f"files_{test_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
-                beta_test = torch.tensor(loadmat(f"files_{test_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
-                n_test = torch.tensor(loadmat(f"files_{test_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
+            # test files
+            X_i_test = torch.tensor(loadmat(f"files_{test_name}/Xi.mat")["Xi"], dtype=PRECISION, requires_grad=True).to(device)
+            X_b_test = torch.tensor(loadmat(f"files_{test_name}/Xb.mat")["Xb"], dtype=PRECISION, requires_grad=True).to(device)
+            test_mse1 = torch.tensor(loadmat(f"files_{test_name}/mse1.mat")["mse1"], dtype=PRECISION).to(device).item()
+            test_u1_error = torch.tensor(loadmat(f"files_{test_name}/u1_error.mat")["relative_error_in_u1"], dtype=PRECISION).to(device).item()
+            test_u_true = torch.tensor(loadmat(f"files_{test_name}/u.mat")["u"], dtype=PRECISION).to(device)
+            f_test = torch.tensor(loadmat(f"files_{test_name}/f.mat")["f"], dtype=PRECISION, requires_grad=True).to(device)
+            g_test = torch.tensor(loadmat(f"files_{test_name}/g.mat")["g"], dtype=PRECISION, requires_grad=True).to(device)
+            alpha_test = torch.tensor(loadmat(f"files_{test_name}/alpha.mat")["Neucoeff"], dtype=PRECISION, requires_grad=True).to(device)
+            beta_test = torch.tensor(loadmat(f"files_{test_name}/beta.mat")["Dircoeff"], dtype=PRECISION).to(device)
+            n_test = torch.tensor(loadmat(f"files_{test_name}/n.mat")["n"], dtype=PRECISION, requires_grad=True).to(device)
 
-                test_x_i = X_i_test[:, 0].unsqueeze(dim=1)
-                test_y_i = X_i_test[:, 1].unsqueeze(dim=1)
-                test_x_b = X_b_test[:, 0].unsqueeze(dim=1)
-                test_y_b = X_b_test[:, 1].unsqueeze(dim=1)
+            test_x_i = X_i_test[:, 0].unsqueeze(dim=1)
+            test_y_i = X_i_test[:, 1].unsqueeze(dim=1)
+            test_x_b = X_b_test[:, 0].unsqueeze(dim=1)
+            test_y_b = X_b_test[:, 1].unsqueeze(dim=1)
 
-                test_x_tilde = torch.vstack([test_x_i, test_x_b])
-                test_y_tilde = torch.vstack([test_y_i, test_y_b])
-                test_X_tilde = torch.hstack([test_x_tilde, test_y_tilde])
+            test_x_tilde = torch.vstack([test_x_i, test_x_b])
+            test_y_tilde = torch.vstack([test_y_i, test_y_b])
+            test_X_tilde = torch.hstack([test_x_tilde, test_y_tilde])
 
-                test_X_b = torch.hstack([test_x_b, test_y_b])
+            test_X_b = torch.hstack([test_x_b, test_y_b])
 
-                # need to separate the spatial dimensions in X matrices for proper partial derivatives with autograd
-                x_i = X_i[:, 0].unsqueeze(dim=1)
-                y_i = X_i[:, 1].unsqueeze(dim=1)
-                x_b = X_b[:, 0].unsqueeze(dim=1)
-                y_b = X_b[:, 1].unsqueeze(dim=1)
-                x_g = X_g[:, 0].unsqueeze(dim=1)
-                y_g = X_g[:, 1].unsqueeze(dim=1)
+            # need to separate the spatial dimensions in X matrices for proper partial derivatives with autograd
+            x_i = X_i[:, 0].unsqueeze(dim=1)
+            y_i = X_i[:, 1].unsqueeze(dim=1)
+            x_b = X_b[:, 0].unsqueeze(dim=1)
+            y_b = X_b[:, 1].unsqueeze(dim=1)
+            x_g = X_g[:, 0].unsqueeze(dim=1)
+            y_g = X_g[:, 1].unsqueeze(dim=1)
 
-                # only compute losses on interior and boundary points
-                ib_idx = X_i.shape[0] + X_b.shape[0]
+            # only compute losses on interior and boundary points
+            ib_idx = X_i.shape[0] + X_b.shape[0]
 
-                # define list for Trainer input
-                config = {
-                    'spatial_dim': 2,
-                    'precision': network_precision,
-                    'activation': activation_function,
-                    'order': 2, # activation order
-                    'layers': 4,
-                    'nodes': 50,
-                    'epochs': 200,
-                    'optimizer': 'lbfgs',
-                    'lr': lr,
-                }
-                vars = {
-                    'n': n,
-                    'x_i': x_i,
-                    'x_b': x_b,
-                    'x_g': x_g,
-                    'y_i': y_i,
-                    'y_b': y_b,
-                    'y_g': y_g,
-                    'ib_idx': ib_idx,
-                    'u': u1,
-                    'u_true': u_true,
-                    'test_X_tilde': test_X_tilde,
-                    'test_u_true': test_u_true,
-                    'test_mse1': test_mse1,
-                    'test_u1_error': test_u1_error,
-                    'test_x_i': test_x_i,
-                    'test_y_i': test_y_i,
-                    'test_x_b': test_x_b,
-                    'test_y_b': test_y_b,
-                    'test_x_tilde': test_x_tilde,
-                    'test_y_tilde': test_y_tilde,
-                    'test_X_b': test_X_b,
-                    'f_test': f_test,
-                    'beta_test': beta_test,
-                    'alpha_test': alpha_test,
-                    'g_test': g_test,
-                    'n_test': n_test,
-                    'f': f,
-                    'g': g,
-                    'alpha': alpha,
-                    'beta': beta,
-                    'mse1': mse1,
-                    'u1_error': u1_error,
-                    'b_end': b_end,
-                    'b_starts': b_starts,
-                    'supervised': cur_supervised_option,
-                    'print_interval': 10,
-                    'verbosity': True,
-                }
+            # define list for Trainer input
+            config = {
+                'spatial_dim': 2,
+                'precision': network_precision,
+                'activation': activation_function,
+                'order': 2, # activation order
+                'layers': 4,
+                'nodes': 50,
+                'epochs': 200,
+                'optimizer': 'lbfgs',
+                'lr': lr,
+            }
+            vars = {
+                'n': n,
+                'x_i': x_i,
+                'x_b': x_b,
+                'x_g': x_g,
+                'y_i': y_i,
+                'y_b': y_b,
+                'y_g': y_g,
+                'ib_idx': ib_idx,
+                'u': u1,
+                'u_true': u_true,
+                'test_X_tilde': test_X_tilde,
+                'test_u_true': test_u_true,
+                'test_mse1': test_mse1,
+                'test_u1_error': test_u1_error,
+                'test_x_i': test_x_i,
+                'test_y_i': test_y_i,
+                'test_x_b': test_x_b,
+                'test_y_b': test_y_b,
+                'test_x_tilde': test_x_tilde,
+                'test_y_tilde': test_y_tilde,
+                'test_X_b': test_X_b,
+                'f_test': f_test,
+                'beta_test': beta_test,
+                'alpha_test': alpha_test,
+                'g_test': g_test,
+                'n_test': n_test,
+                'f': f,
+                'g': g,
+                'alpha': alpha,
+                'beta': beta,
+                'mse1': mse1,
+                'u1_error': u1_error,
+                'b_end': b_end,
+                'b_starts': b_starts,
+                'supervised': cur_supervised_option,
+                'print_interval': 10,
+                'verbosity': True,
+            }
 
-                flag = True
-                while flag:
-                    trainer = Trainer(config=config, **vars)
-                    logged_results = trainer.train()
-                    if type(logged_results) == bool:
-                        config['lr'] /= 2.0
-                        print(f"Restarting with learning rate = {config['lr']}")
-                        continue
-                    else:
-                        flag = False
+            flag = True
+            while flag:
+                trainer = Trainer(config=config, **vars)
+                logged_results = trainer.train()
+                if type(logged_results) == bool:
+                    config['lr'] /= 2.0
+                    print(f"Restarting with learning rate = {config['lr']}")
+                    continue
+                else:
+                    flag = False
 
-                logged_results = logged_results | config
-                config['lr'] = lr
+            logged_results = logged_results | config
+            config['lr'] = lr
 
